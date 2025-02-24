@@ -13,11 +13,13 @@ import {
 } from '@pages';
 import { AppHeader, IngredientDetails, Modal, OrderInfo } from '@components';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { fetchIngredients } from '../../services/slices/ingredientsSlice';
-import { useDispatch } from '../../services/store';
-import { Preloader } from '../ui/preloader';
-/*import ProtectedRoute from '../protected-route/protected-route';*/
+import { useEffect } from 'react';
+import {
+  fetchIngredients,
+  getIngredientsLoadingSelector
+} from '../../services/slices/ingredientsSlice';
+import { useDispatch, useSelector } from '../../services/store';
+import { OnlyAuth, OnlyUnAuth } from '../protected-route/protected-route';
 
 const App = () => {
   const location = useLocation();
@@ -26,22 +28,13 @@ const App = () => {
 
   const backgroundLocation = location.state?.background;
 
-  // TODO: Только loading должен в сторе храниться
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     dispatch(fetchIngredients());
-    setLoading(false);
   }, []);
 
-  // TODO: реализовать закрытие модального окна
   const onClose = () => {
     navigate(-1);
   };
-
-  if (loading) {
-    return <Preloader />;
-  }
 
   return (
     <div className={styles.app}>
@@ -49,12 +42,24 @@ const App = () => {
       <Routes location={backgroundLocation || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
-        <Route path='/forgot-password' element={<ForgotPassword />} />
-        <Route path='/reset-password' element={<ResetPassword />} />
-        <Route path='/profile' element={<Profile />} />
-        <Route path='/profile/orders' element={<ProfileOrders />} />
+        <Route path='/login' element={<OnlyUnAuth component={<Login />} />} />
+        <Route
+          path='/register'
+          element={<OnlyUnAuth component={<Register />} />}
+        />
+        <Route
+          path='/forgot-password'
+          element={<OnlyUnAuth component={<ForgotPassword />} />}
+        />
+        <Route
+          path='/reset-password'
+          element={<OnlyAuth component={<ResetPassword />} />}
+        />
+        <Route path='/profile' element={<OnlyAuth component={<Profile />} />} />
+        <Route
+          path='/profile/orders'
+          element={<OnlyAuth component={<ProfileOrders />} />}
+        />
         <Route path='*' element={<NotFound404 />} />
         <Route path='/feed/:number' element={<OrderInfo />} />
         <Route
@@ -85,7 +90,15 @@ const App = () => {
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal title={'1'} onClose={onClose} children={<OrderInfo />} />
+              <OnlyAuth
+                component={
+                  <Modal
+                    title={'1'}
+                    onClose={onClose}
+                    children={<OrderInfo />}
+                  />
+                }
+              />
             }
           />
         </Routes>

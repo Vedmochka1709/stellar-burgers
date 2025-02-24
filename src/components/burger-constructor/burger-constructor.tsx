@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 import { TConstructorIngredient } from '@utils-types';
-import { BurgerConstructorUI, Preloader } from '@ui';
+import { BurgerConstructorUI } from '@ui';
 import { useDispatch, useSelector } from '../../services/store';
 import {
   clearConstructor,
@@ -12,7 +12,8 @@ import {
   getOrderRequest,
   orderBurger
 } from '../../services/slices/orderSlice';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { isAuthenticated } from '../../services/slices/userSlice';
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
@@ -21,6 +22,7 @@ export const BurgerConstructor: FC = () => {
   const constructorItems = useSelector(getBurgerIngredients);
   const orderRequest = useSelector(getOrderRequest);
   const orderModalData = useSelector(getOrderData);
+  const AuthenticatedUser = useSelector(isAuthenticated);
 
   const orderData = () => {
     if (!constructorItems.bun) return [''];
@@ -33,7 +35,13 @@ export const BurgerConstructor: FC = () => {
 
   // кнопка оформления заказа
   const onOrderClick = () => {
-    //TODO: для авторизованного пользователя
+    if (!AuthenticatedUser) {
+      navigate('/login', {
+        replace: true,
+        state: { from: location.pathname }
+      });
+      return;
+    }
     if (!constructorItems.bun || orderRequest) return;
     dispatch(orderBurger(orderData()));
   };

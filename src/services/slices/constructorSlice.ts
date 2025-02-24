@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TConstructorIngredient, TIngredient } from '@utils-types';
-import { RootState } from '../store';
 
 type TBurgerState = {
   bun: TIngredient | null;
@@ -30,13 +29,12 @@ const constructorSlice = createSlice({
         (item) => item.id !== payload
       );
     },
-    // TODO: позволяет перемещать элементы в списке
+    // позволяет перемещать элементы в списке
     moveIngredient: (
       state,
       { payload }: PayloadAction<{ fromIndex: number; toIndex: number }>
     ) => {
       const { fromIndex, toIndex } = payload;
-      // Убедитесь, что индексы находятся в пределах массива
       if (
         fromIndex < 0 ||
         fromIndex >= state.ingredients.length ||

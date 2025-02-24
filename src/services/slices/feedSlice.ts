@@ -28,11 +28,11 @@ const initialState: TFeedState = {
 const feedSlice = createSlice({
   name: 'feeds',
   initialState,
-  reducers: {},
+  reducers: {
+    clearFeed: () => initialState
+  },
   selectors: {
-    getFeeds: (state) => state.orders,
-    getTotalFeeds: (state) => state.total,
-    getTodayFeeds: (state) => state.totalToday
+    getFeed: (state) => state
   },
   extraReducers: (builder) => {
     builder
@@ -45,6 +45,7 @@ const feedSlice = createSlice({
         state.orders = action.payload.orders;
         state.total = action.payload.total;
         state.totalToday = action.payload.totalToday;
+        state.error = null;
       })
       .addCase(fetchFeeds.rejected, (state, action) => {
         state.loading = false;
@@ -53,7 +54,8 @@ const feedSlice = createSlice({
   }
 });
 
-export const { getFeeds, getTotalFeeds, getTodayFeeds } = feedSlice.selectors;
+export const { getFeed } = feedSlice.selectors;
+export const { clearFeed } = feedSlice.actions;
 
 const feedsReducer = feedSlice.reducer;
 

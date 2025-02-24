@@ -7,14 +7,16 @@ import { getIngredientsByIdSelector } from '../../services/slices/ingredientsSli
 
 export const IngredientDetails: FC = () => {
   const { id } = useParams();
-  console.log(`покажи данные по id ${id}`);
 
   if (!id) {
-    return <Preloader />;
+    console.log(`не найден id`, id);
+    return null;
   }
 
-  const ingredientData = useSelector((state) =>
-    getIngredientsByIdSelector(state, id)
+  const ingredientData = useSelector(
+    (
+      state // TODO: почему тут не работает useSelector(getIngredientsByIdSelector(state, id))
+    ) => getIngredientsByIdSelector(state, id)
   );
 
   if (!ingredientData) {

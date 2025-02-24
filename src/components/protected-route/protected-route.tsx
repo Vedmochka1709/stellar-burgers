@@ -1,41 +1,44 @@
-/*import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from 'react-router-dom';
+import { getUserData, isAuthChecked } from '../../services/slices/userSlice';
+import { useSelector } from '../../services/store';
+import { Preloader } from '@ui';
 
 type ProtectedRouteProps = {
-	onlyUnAuth?: boolean;
-	children: React.ReactNode;
+  onlyUnAuth?: boolean;
+  component: React.JSX.Element;
 };
- 
-function ProtectedRoute({ children, onlyUnAuth }: ProtectedRouteProps) {
-	const location = useLocation();
-	const user = useSelector(userSelectors.getUser);
-	const isAuthChecked = useSelector(userSelectors.getIsAuthChecked);
 
-	if (!isAuthChecked) {
-		console.log('WAIT USER CHECKOUT');
-		return <Spinner />;
-	}
+export const ProtectedRoute = ({
+  onlyUnAuth = true,
+  component
+}: ProtectedRouteProps): React.JSX.Element => {
+  const user = useSelector(getUserData);
+  const AuthChecked = useSelector(isAuthChecked);
+  const location = useLocation();
 
-	if (onlyUnAuth && user) {
-		console.log('NAVIGATE FROM LOGIN TO INDEX');
-		const from = location.state?.from || { pathname: '/' };
-		const backgroundLocation = location.state?.from?.background || null;
-		return <Navigate replace to={from} state={{ background: backgroundLocation }} />;
-	}
+  if (!AuthChecked) {
+    return <Preloader />;
+  }
 
-	if (!onlyUnAuth && !user) {
-		console.log('NAVIGATE FROM PAGE TO LOGIN');
-		return <Navigate replace to={'/login'} state={{ from: {...location, background: location.state?.background, state: null}}} />;
-	}
+  if (!onlyUnAuth && !user) {
+    // маршрут для авторизованного, но не авторизован
+    return <Navigate to='/login' replace state={{ from: location }} />;
+  }
 
-	console.log('RENDER COMPONENT');
+  if (onlyUnAuth && user) {
+    // маршрут для неавторизованного, но авторизован
+    const { from } = location.state ?? { from: { pathname: '/' } };
+    return <Navigate replace to={from} />;
+  }
 
-	return children;
-}
+  // onlyUnAuth && !user для неавторизованного и неавторизован
+  // !onlyUnAuth && user для авторизованного и авторизован
 
-export default ProtectedRoute;
+  return component;
+};
 
-function useSelector(getUser: any) {
-    throw new Error("Function not implemented.");
-}
-*/
+export const OnlyUnAuth = ProtectedRoute;
+
+export const OnlyAuth = ({ component }: { component: React.JSX.Element }) => (
+  <ProtectedRoute onlyUnAuth={false} component={component} />
+);

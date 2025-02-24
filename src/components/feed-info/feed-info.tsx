@@ -2,6 +2,8 @@ import { FC } from 'react';
 
 import { TOrder } from '@utils-types';
 import { FeedInfoUI } from '../ui/feed-info';
+import { useSelector } from '../../services/store';
+import { getFeed } from '../../services/slices/feedSlice';
 
 // Фильтрует по статусу заказов и выводит первые 20 чисел
 const getOrders = (orders: TOrder[], status: string): number[] =>
@@ -11,9 +13,8 @@ const getOrders = (orders: TOrder[], status: string): number[] =>
     .slice(0, 20);
 
 export const FeedInfo: FC = () => {
-  /** TODO: взять переменные из стора */
-  const orders: TOrder[] = [];
-  const feed = {};
+  const feed = useSelector(getFeed);
+  const orders: TOrder[] = feed.orders;
 
   const readyOrders = getOrders(orders, 'done');
 

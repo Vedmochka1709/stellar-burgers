@@ -1,7 +1,7 @@
 import { getOrderByNumberApi, getOrdersApi, orderBurgerApi } from '@api';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { TOrder } from '@utils-types';
-import { get } from 'http';
+import { RootState } from '../store';
 
 // Создание асинхронных экшенов
 export const fetchOrders = createAsyncThunk(
@@ -56,7 +56,7 @@ const orderSlice = createSlice({
   selectors: {
     getOrderData: (state) => state.orderData,
     getOrderRequest: (state) => state.orderRequest,
-    getOrders: (state) => state.orders
+    getAllOrders: (state) => state.orders
   },
   extraReducers: (builder) => {
     builder
@@ -69,6 +69,7 @@ const orderSlice = createSlice({
         state.orderRequest = false;
         state.orderData = action.payload.order;
         state.name = action.payload.name;
+        state.orders.push(action.payload.order);
       })
       // получение списка заказов
       .addCase(fetchOrders.pending, (state) => {
@@ -96,7 +97,22 @@ const orderSlice = createSlice({
   }
 });
 
-export const { getOrderData, getOrderRequest, getOrders } =
+export const getOrderByNumber =
+  (number: string) =>
+  ({ order, feeds }: RootState) => {
+    const orderNumber = Number(number);
+    // Создаем массив всех заказов для упрощения поиска
+    const allOrders = [...order.orders, ...feeds.orders];
+    // Ищем заказ в объединенном массиве
+    const foundOrder = allOrders.find((item) => item.number === orderNumber);
+    // Возвращаем найденный заказ или orderData, если номер совпадает
+    return (
+      foundOrder ||
+      (order.orderData?.number === orderNumber ? order.orderData : null)
+    );
+  };
+
+export const { getOrderData, getOrderRequest, getAllOrders } =
   orderSlice.selectors;
 
 export const { clearOrderData, clearOrders } = orderSlice.actions;
